@@ -1,0 +1,280 @@
+{
+    "name": "TIAGo Input Actions",
+    "maps": [
+        {
+            "name": "TIAGo Interaction",
+            "id": "f87c050f-5cf6-47c2-a584-170bafb9a43d",
+            "actions": [
+                {
+                    "name": "Left Scroll",
+                    "type": "Value",
+                    "id": "05ebaf68-5622-4d2d-85fa-ba0a196dfbe8",
+                    "expectedControlType": "Stick",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Right Scroll",
+                    "type": "Value",
+                    "id": "39ca56fe-dc62-47b1-a7de-1a5e3afdf08c",
+                    "expectedControlType": "Stick",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Right Trigger",
+                    "type": "Button",
+                    "id": "144f7eb7-ad9d-4e6b-bf01-380e5046e251",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Right Squeeze",
+                    "type": "Button",
+                    "id": "58cfa95a-1f96-44d6-8c59-03c0ba0c3eac",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Left Trigger",
+                    "type": "Button",
+                    "id": "176319c8-850f-42c9-bf4a-b7e2332f3e8b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Left Squeeze",
+                    "type": "Button",
+                    "id": "f8c09efe-9c34-4cb1-852e-67420d311ac8",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Head Orientation",
+                    "type": "PassThrough",
+                    "id": "5aea7ff1-8478-482a-b1f6-2c872b69ac72",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Right A Button",
+                    "type": "Button",
+                    "id": "e617222e-afaf-4f1b-8371-4230b90b341a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Right B Button",
+                    "type": "Button",
+                    "id": "da9acf4c-cfb0-49bd-82e4-4a07a96341eb",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Right Controller Position",
+                    "type": "Value",
+                    "id": "40d3cd4d-768b-45ed-b67a-ed7bac7a74c2",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Right Controller Orientation",
+                    "type": "Value",
+                    "id": "3bb59ca2-0c33-4162-bf17-742123162aa4",
+                    "expectedControlType": "Quaternion",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Left X Button",
+                    "type": "Button",
+                    "id": "a275851a-2a66-4656-bdae-d5a0160b1a20",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Left Y Button",
+                    "type": "Button",
+                    "id": "a4ef7f4b-4cb5-4419-ba1f-43b31e8bc99f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d78ec69d-87c4-4f6c-a544-73ff37298887",
+                    "path": "<XRController>{LeftHand}/{Primary2DAxis}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Left Scroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "82fd6ee2-3783-4707-897d-21bd0e7eaad9",
+                    "path": "<XRController>{RightHand}/{Primary2DAxis}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Right Scroll",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6c50983c-570d-4bf4-9b36-46e644e0f2a0",
+                    "path": "<XRController>{RightHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Right Trigger",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2378e930-23c8-4e02-ba29-ad32f12b20e9",
+                    "path": "<XRController>{RightHand}/{GripButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Right Squeeze",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "37fba349-b5d7-4b3f-867e-aaae0df18e6b",
+                    "path": "<XRController>{LeftHand}/{TriggerButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Left Trigger",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9ac96d3a-d5ee-4aaa-885d-3f7abb72f58e",
+                    "path": "<XRController>{LeftHand}/{GripButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Left Squeeze",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5a3a3a69-c7a3-41db-821a-b66ce6cece73",
+                    "path": "<XRHMD>/centerEyeRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Head Orientation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "506dec14-50f7-4d76-ac47-e788baa07c52",
+                    "path": "<XRController>{RightHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Right A Button",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4492a997-0cf8-45e4-abcf-b99dc585b61e",
+                    "path": "<XRController>{RightHand}/secondaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Right B Button",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "54dda0fd-2179-4970-b88c-745146147a35",
+                    "path": "<XRController>{RightHand}/devicePosition",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Right Controller Position",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b4ad77ee-ae12-484f-815f-b803aa71b3f1",
+                    "path": "<XRController>{RightHand}/deviceRotation",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Right Controller Orientation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "55ef5bdf-9a36-4e71-bf03-7474c8e647f8",
+                    "path": "<XRController>{LeftHand}/primaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Left X Button",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6dce4446-1c88-40b6-b0e4-898b1d38c3cb",
+                    "path": "<XRController>{LeftHand}/secondaryButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "TiAGO Actions",
+                    "action": "Left Y Button",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": [
+        {
+            "name": "TiAGO Actions",
+            "bindingGroup": "TiAGO Actions",
+            "devices": []
+        }
+    ]
+}
