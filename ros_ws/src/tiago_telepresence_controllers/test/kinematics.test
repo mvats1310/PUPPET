@@ -1,0 +1,13 @@
+<launch>
+    <include file="$(find tiago_description)/robots/upload.launch">
+        <arg name="arm" value="True"/>
+        <arg name="end_effector" value="pal-gripper"/>
+        <arg name="ft_sensor" value="schunk-ft"/>
+        <arg name="base_type" value="pmb2"/>
+    </include>
+
+    <param name="start_link" value="torso_lift_link"/>
+    <param name="end_link" value="gripper_grasping_frame"/>
+
+    <test test-name="kinematics" pkg="tiago_telepresence_controllers" type="kinematics_test"/>
+</launch>

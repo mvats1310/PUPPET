@@ -1,0 +1,18 @@
+<launch>
+    <arg name="arm"/>
+    <arg name="motion"/>
+
+    <rosparam file="$(find tiago_telepresence_controllers)/config/telepresence_motions_dual.yaml" command="load" />
+
+    <node name="tp_controller_switcher" pkg="tiago_telepresence_controllers" type="tp_controller_switcher.py" output="screen"/>
+
+    <node name="tp_arm_motion"
+          pkg="tiago_telepresence_controllers" type="arm_motion.py" output="screen"
+          args="--arm $(arg arm) --motion '$(arg motion)'"/>
+
+    <rosparam command="load" file="$(find tiago_telepresence_controllers)/config/telepresence_controllers_dual.yaml"/>
+
+    <node name="telepresence_controllers_spawner"
+          pkg="controller_manager" type="spawner" output="screen"
+          args="--stopped arm_$(arg arm)_tp_controller gripper_$(arg arm)_tp_controller torso_tp_controller head_tp_controller"/>
+</launch>

@@ -1,0 +1,16 @@
+<launch>
+    <include file="$(find tiago_dual_description)/robots/upload.launch">
+        <arg name="arm_left" value="True"/>
+        <arg name="arm_right" value="True"/>
+        <arg name="end_effector_left" value="pal-gripper"/>
+        <arg name="end_effector_right" value="pal-gripper"/>
+        <arg name="ft_sensor_left" value="schunk-ft"/>
+        <arg name="ft_sensor_right" value="schunk-ft"/>
+        <arg name="base_type" value="pmb2"/>
+    </include>
+
+    <!-- <param name="start_link" value="torso_lift_link"/>
+    <param name="end_link" value="gripper_right_grasping_frame"/> -->
+
+    <test test-name="kinematics_dual" pkg="tiago_telepresence_controllers" type="kinematics_dual_test"/>
+</launch>

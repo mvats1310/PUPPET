@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+    <arg name="tcp_ip" default="0.0.0.0"/>
+    <arg name="tcp_port" default="10000"/>
+    <arg name="debug" default="false"/>
+    <arg name="world" default="simple_office_with_people"/>
+    <arg name="extra_gazebo_args" default=""/>
+    <arg name="motion" default=""/>
+
+    <include file="$(find tiago_dual_gazebo)/launch/tiago_dual_gazebo.launch">
+        <arg name="end_effector_left" value="pal-gripper"/>
+        <arg name="end_effector_right" value="pal-gripper"/>
+        <arg name="gui" value="true"/>
+        <arg name="debug" default="$(arg debug)"/>
+        <arg name="public_sim" value="true"/>
+        <arg name="tuck_arm" default="false"/>
+        <arg name="base_type" value="pmb2"/>
+        <arg name="world" default="$(arg world)"/>
+        <arg name="extra_gazebo_args" value="$(arg extra_gazebo_args)"/>
+    </include>
+
+    <include file="$(find ros_tcp_endpoint)/launch/endpoint.launch">
+        <arg name="tcp_ip" value="$(arg tcp_ip)"/>
+        <arg name="tcp_port" value="$(arg tcp_port)"/>
+    </include>
+
+    <include file="$(find tiago_telepresence_controllers)/launch/telepresence_controllers_dual.launch">
+        <arg name="arm" value="right"/>
+        <arg name="motion" value="$(arg motion)"/>
+    </include>
+</launch>

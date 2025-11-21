@@ -1,0 +1,36 @@
+head_tp_controller:
+  type: "tiago_telepresence_controllers/HeadControllerPlugin"
+  joint_names:
+  - head_1_joint
+  - head_2_joint
+  buffer_min_size: 5
+
+torso_tp_controller:
+  type: "tiago_telepresence_controllers/TorsoControllerPlugin"
+  joint_names:
+  - torso_lift_joint
+  step: 0.005
+
+gripper_right_tp_controller:
+  type: "tiago_telepresence_controllers/GripperControllerPlugin"
+  joint_names:
+  - gripper_right_left_finger_joint
+  - gripper_right_right_finger_joint
+  step: 0.005
+
+arm_right_tp_controller:
+  type: "tiago_telepresence_controllers/ArmControllerPlugin"
+  joint_names:
+  - arm_right_1_joint
+  - arm_right_2_joint
+  - arm_right_3_joint
+  - arm_right_4_joint
+  - arm_right_5_joint
+  - arm_right_6_joint
+  - arm_right_7_joint
+  ik_solver_vel_eps: 0.01
+  ik_solver_vel_max_iter: 100
+  start_link: "torso_lift_link"
+  end_link: "gripper_right_grasping_frame"
+  buffer_min_size: 5
+  state_publish_throttle: 0.05

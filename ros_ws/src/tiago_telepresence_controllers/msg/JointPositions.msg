@@ -1,0 +1,8 @@
+float64[] positions
+
+int32 CMD_OK=0
+int32 CMD_OUT_OF_LIMITS=1
+int32 CMD_SINGULARITY=2
+int32 CMD_CONVERGENCE=3
+int32 CMD_UNKNOWN_ERROR=3
+int32 status

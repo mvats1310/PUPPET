@@ -1,0 +1,19 @@
+play_motion:
+  motions:
+    extend:
+      joints:
+      - torso_lift_joint
+      - arm_1_joint
+      - arm_2_joint
+      - arm_3_joint
+      - arm_4_joint
+      - arm_5_joint
+      - arm_6_joint
+      - arm_7_joint
+      points:
+      - positions: [0.30, 0.0, -0.8, 1.7, -1.5, 0.0, 1.0, 0.0]
+        time_from_start: 5.0
+      meta:
+        name: Extend
+        usage: telepresence
+        description: "Extend arm"

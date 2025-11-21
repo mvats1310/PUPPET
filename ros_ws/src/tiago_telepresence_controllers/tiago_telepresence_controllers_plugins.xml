@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<library path="lib/libtiago_telepresence_controllers">
+    <class name="tiago_telepresence_controllers/HeadControllerPlugin"
+           type="tiago_telepresence_controllers::HeadController"
+           base_class_type="controller_interface::ControllerBase" />
+
+    <class name="tiago_telepresence_controllers/TorsoControllerPlugin"
+           type="tiago_telepresence_controllers::TorsoController"
+           base_class_type="controller_interface::ControllerBase" />
+
+    <class name="tiago_telepresence_controllers/GripperControllerPlugin"
+           type="tiago_telepresence_controllers::GripperController"
+           base_class_type="controller_interface::ControllerBase" />
+
+    <class name="tiago_telepresence_controllers/ArmControllerPlugin"
+           type="tiago_telepresence_controllers::ArmController"
+           base_class_type="controller_interface::ControllerBase" />
+</library>
