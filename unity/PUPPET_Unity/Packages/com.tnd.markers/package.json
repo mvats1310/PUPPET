@@ -1,0 +1,22 @@
+{
+  "name": "com.tnd.markers",
+  "displayName": "TND Markers!",
+  "version": "1.0.0",
+  "unity": "2021.3",
+  "description": "A gameplay tool with which markers shown on screen during gameplay, to serve as guidance or indicator for the player.",
+  "keywords": [
+    "gameplay"
+  ],
+  "category": "",
+  "samples": [],
+  "repository": {
+    "type": "",
+    "url": "",
+    "revision": ""
+  },
+  "author": {
+    "name": "TND",
+    "email": "info@thenakeddev.com",
+    "url": "https://www.thenakeddev.com"
+  }
+}
