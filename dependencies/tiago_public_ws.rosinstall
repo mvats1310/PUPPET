@@ -1,0 +1,265 @@
+- git:
+    ROS-TCP-Endpoint:
+      type: git
+      url: https://github.com/Unity-Technologies/ROS-TCP-Endpoint.git
+      version: 993d366b8900bf9f3d2da444fde64c0379b4dc7c
+- git:
+    aruco_ros:
+      type: git
+      url: https://github.com/pal-robotics/aruco_ros.git
+      version: 3680aea43f8c54382092d6e886bb1a30ca09fad5
+- git:
+    backward_ros:
+      type: git
+      url: https://github.com/pal-robotics/backward_ros
+      version: 0eaa66390226a3643ffafc0854098a9d37dbb0f8
+- git:
+    custom_end_effector:
+      type: git
+      url: https://github.com/pal-robotics/custom_end_effector.git
+      version: 23da28c6736e6b1a4bf548f748afa1127968b42d
+- git:
+    ddynamic_reconfigure_python:
+      type: git
+      url: https://github.com/pal-robotics/ddynamic_reconfigure_python
+      version: d1dc50162fb8fc3112d3e5483ff09369c9533f69
+- git:
+    dynamic_introspection:
+      type: git
+      url: https://github.com/pal-robotics/dynamic_introspection
+      version: 131d9100fd41a9858fe06f55f4bdd112e574c295
+- git:
+    eband_local_planner:
+      type: git
+      url: https://github.com/pal-robotics-forks/eband_local_planner.git
+      version: 02252d0fecd1327dacd301d851ab0e9d2c92c5a7
+- git:
+    gazebo_ros_pkgs:
+      type: git
+      url: https://github.com/pal-robotics-forks/gazebo_ros_pkgs.git
+      version: 542d3f50072aac2c13ca4f9a14405da3246915fb
+- git:
+    head_action:
+      type: git
+      url: https://github.com/pal-robotics/head_action.git
+      version: 79e98a8e54b10960fb9d11fbd5a5e8c408f1b702
+- git:
+    hey5_description:
+      type: git
+      url: https://github.com/pal-robotics/hey5_description.git
+      version: 6608818d3df3391590f090be61a4b34dceb4af0d
+- git:
+    humanoid_msgs:
+      type: git
+      url: https://github.com/ahornung/humanoid_msgs.git
+      version: 6fcf3b6c54bbbac2eddb1cf63699811f835eb1d7
+- git:
+    natnet_ros_cpp:
+      type: git
+      url: https://github.com/L2S-lab/natnet_ros_cpp
+      version: abdde999bab48e52c28e3a3c4db833552d50b309
+- git:
+    navigation_layers:
+      type: git
+      url: https://github.com/DLu/navigation_layers.git
+      version: 8899b6e9504165469468cc966f9030305ed5d827
+- git:
+    omni_base_navigation:
+      type: git
+      url: https://github.com/pal-robotics/omni_base_navigation.git
+      version: db11ec704f8fc6e5932b8c24e27d2bac45463f24
+- git:
+    omni_base_robot:
+      type: git
+      url: https://github.com/pal-robotics/omni_base_robot.git
+      version: 91e9d1cd99573f980dd0587ceaf224b098d39443
+- git:
+    omni_base_simulation:
+      type: git
+      url: https://github.com/pal-robotics/omni_base_simulation.git
+      version: b1214ab49ef27147b6a1016d87a23094d8854fc0
+- git:
+    openslam_gmapping:
+      type: git
+      url: https://github.com/ros-perception/openslam_gmapping.git
+      version: 5105476edb125bd3e05df3583b5817c486238dec
+- git:
+    optitrack_ros_communication:
+      type: git
+      url: https://github.com/IE-Robotics-Lab/optitrack_ros_communication.git
+      version: ebe3999d4b38ea952005b1434839ccb91e57b6b6
+- git:
+    pal_gazebo_plugins:
+      type: git
+      url: https://github.com/pal-robotics/pal_gazebo_plugins.git
+      version: 5677a5ec75983286ef8f34c364fc0b4c5c7fceaa
+- git:
+    pal_gazebo_worlds:
+      type: git
+      url: https://github.com/pal-robotics/pal_gazebo_worlds.git
+      version: b90a7b2d2e0a0b5273ab655c5789b37d449c1f61
+- git:
+    pal_gripper:
+      type: git
+      url: https://github.com/pal-robotics/pal_gripper.git
+      version: 9814212435467157a7b90aa43b58472340221189
+- git:
+    pal_hardware_gazebo:
+      type: git
+      url: https://github.com/pal-robotics/pal_hardware_gazebo.git
+      version: 320e67210e7017f3ea417280a55c7857f9556517
+- git:
+    pal_hardware_interfaces:
+      type: git
+      url: https://github.com/pal-robotics/pal_hardware_interfaces.git
+      version: 64da44a3771481a96a6bb8ac3df25169984225f9
+- git:
+    pal_motion_loader:
+      type: git
+      url: https://github.com/pal-robotics/pal_motion_loader.git
+      version: 8027ffab08d041af20a43d975524f6a8706b9cf1
+- git:
+    pal_msgs:
+      type: git
+      url: https://github.com/pal-robotics/pal_msgs.git
+      version: b843390cbf26e3c6397219a674015117ce61fce2
+- git:
+    pal_navigation_cfg_public:
+      type: git
+      url: https://github.com/pal-robotics/pal_navigation_cfg_public.git
+      version: ae3f03ea5d3dec4b666b6e14c05e310079415166
+- git:
+    pal_navigation_sm:
+      type: git
+      url: https://github.com/pal-robotics/pal_navigation_sm.git
+      version: 3e6ae1082a8f636b6dda8df7b1b054cfe568a20d
+- git:
+    pal_python:
+      type: git
+      url: https://github.com/pal-robotics/pal_python.git
+      version: 2e33adfb1edbe9625b0e900ade9480582fd8b388
+- git:
+    pal_robotiq_gripper:
+      type: git
+      url: https://github.com/pal-robotics/pal_robotiq_gripper.git
+      version: 4f1b047cc3c1be4ab28adb43749594d106048f21
+- git:
+    pal_statistics:
+      type: git
+      url: https://github.com/pal-robotics/pal_statistics
+      version: a5b028b8472c7aad6f74dc489e397ad854c514b4
+- git:
+    pal_urdf_utils:
+      type: git
+      url: https://github.com/pal-robotics/pal_urdf_utils.git
+      version: a6e9d54d2f9a5ed35ea8658b3b0cae4eef7a4ca2
+- git:
+    pal_wsg_gripper:
+      type: git
+      url: https://github.com/pal-robotics/pal_wsg_gripper
+      version: ee542262a264f220142c787c0e005b5664bffa66
+- git:
+    play_motion:
+      type: git
+      url: https://github.com/pal-robotics/play_motion.git
+      version: 7d8e0b5fdbb214cf4371869dcbac7c121afd1b22
+- git:
+    pmb2_navigation:
+      type: git
+      url: https://github.com/pal-robotics/pmb2_navigation
+      version: fc5747bee9876eaf275aebe7a1fcfdf2a74f29bb
+- git:
+    pmb2_robot:
+      type: git
+      url: https://github.com/pal-robotics/pmb2_robot.git
+      version: 90b419d64a786cbcf3ba22623b68259f354698aa
+- git:
+    pmb2_simulation:
+      type: git
+      url: https://github.com/pal-robotics/pmb2_simulation.git
+      version: 3c6829579877598351f43f8924ed10ab347bf507
+- git:
+    robot_pose:
+      type: git
+      url: https://github.com/pal-robotics/robot_pose
+      version: 5a3773f4cacbaa0d866a8e2cc3e4e96bdc374923
+- git:
+    roboticsgroup_gazebo_plugins:
+      type: git
+      url: https://github.com/pal-robotics-forks/roboticsgroup_gazebo_plugins.git
+      version: bdc61975f998dfdd0d9516c2e67655a296369e29
+- git:
+    ros_control:
+      type: git
+      url: https://github.com/pal-robotics-forks/ros_control.git
+      version: d4da79b1c19db1a17d06b5d4e46ad6df38f4375c
+- git:
+    ros_controllers:
+      type: git
+      url: https://github.com/pal-robotics-forks/ros_controllers.git
+      version: 30e0110f2282ba73262b23b4a88af2c32c6750cd
+- git:
+    rviz_plugin_covariance:
+      type: git
+      url: https://github.com/pal-robotics/rviz_plugin_covariance.git
+      version: b93e3ecc14117e8f757805b63871506ed99ac177
+- git:
+    simple_grasping_action:
+      type: git
+      url: https://github.com/pal-robotics/simple_grasping_action.git
+      version: f5e353c18407a003f27372f6d4d83eae9479fce1
+- git:
+    simple_models_robot:
+      type: git
+      url: https://github.com/pal-robotics/simple_models_robot.git
+      version: 568a2f3c6f294d79f98434264af36ddd69e794a7
+- git:
+    slam_gmapping:
+      type: git
+      url: https://github.com/ros-perception/slam_gmapping.git
+      version: eec86068ceb92ebc433b435fe482db14c562f268
+- git:
+    teleop_tools:
+      type: git
+      url: https://github.com/pal-robotics-forks/teleop_tools.git
+      version: 9b42c179afa6a6ca0b37efd0588554f785ed7868
+- git:
+    tf_lookup:
+      type: git
+      url: https://github.com/pal-robotics/tf_lookup.git
+      version: b4f91d32d029c8ca1089700737d7f290569d7362
+- git:
+    tiago-unity-vr:
+      type: git
+      url: https://github.com/roboticslab-uc3m/tiago-unity-vr.git
+      version: 0f41b7fa5a8ef167c0e4e29ef2979fad6fa1c269
+- git:
+    tiago_description_calibration:
+      type: git
+      url: https://github.com/pal-robotics/tiago_description_calibration.git
+      version: b608b8da030d9dc61b474bfffad6b01655d52d71
+- git:
+    tiago_moveit_config:
+      type: git
+      url: https://github.com/pal-robotics/tiago_moveit_config.git
+      version: 30ad2d323ce8170c102595a8ed5605d142c82164
+- git:
+    tiago_navigation:
+      type: git
+      url: https://github.com/pal-robotics/tiago_navigation.git
+      version: 6eb3dd28ca7b932416ff527e403ded4ffcc88f63
+- git:
+    tiago_robot:
+      type: git
+      url: https://github.com/pal-robotics/tiago_robot.git
+      version: 234b653b2a063e89bcdf7c9b2c419272531eab5a
+- git:
+    tiago_simulation:
+      type: git
+      url: https://github.com/pal-robotics/tiago_simulation.git
+      version: e4d945589ec831582704daf404539d675e4ea716
+- git:
+    tiago_tutorials:
+      type: git
+      url: https://github.com/pal-robotics/tiago_tutorials.git
+      version: 64249ef934d0b8fb67b5534d7c60b1a368fd166a
