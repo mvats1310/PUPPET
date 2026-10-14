@@ -1,0 +1,31 @@
+<launch>
+  <!-- OptiTrack Arguments -->
+  <arg name="serverIP" default="10.205.3.3"/>
+  <arg name="clientIP" default="10.205.3.254"/>
+
+  <!-- NatNet Options -->
+  <arg name="log_internals" default="false"/>
+  <arg name="log_frames" default="false"/>
+  <arg name="log_latencies" default="false"/>
+
+  <arg name="serverType" default="unicast"/>
+
+  <arg name="pub_rigid_body" default="true"/> 
+  <arg name="pub_rigid_body_marker" default="false"/>  
+  <arg name="pub_individual_marker" default="false"/>
+  <arg name="pub_pointcloud" default="false"/>
+
+  <!-- Launch the OptiTrack NatNet Client -->
+  <include file="$(find natnet_ros_cpp)/launch/natnet_ros.launch">
+      <arg name="log_internals" value="$(arg log_internals)"/>
+      <arg name="log_frames" value="$(arg log_frames)"/>
+      <arg name="log_latencies" value="$(arg log_latencies)"/>
+      <arg name="serverIP" value="$(arg serverIP)"/>
+      <arg name="clientIP" value="$(arg clientIP)"/>
+      <arg name="serverType" value="$(arg serverType)"/>
+      <arg name="pub_rigid_body" default="$(arg pub_rigid_body)"/>
+      <arg name="pub_rigid_body_marker" default="$(arg pub_rigid_body_marker)"/>  
+      <arg name="pub_individual_marker" default="$(arg pub_individual_marker)"/>
+      <arg name="pub_pointcloud" default="$(arg pub_pointcloud)"/>
+    </include>
+</launch>

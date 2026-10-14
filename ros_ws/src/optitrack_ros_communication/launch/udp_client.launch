@@ -1,0 +1,17 @@
+<launch>
+  <!-- UDP Arguments -->
+  <arg name="number_of_nodes" default="2"/>
+  <arg name="base_id" default="0"/>
+  <arg name="udp_server_ip" default="10.205.3.4"/>
+  <arg name="base_port" default="9876"/>
+  <arg name="namespace" default="natnet_ros"/>
+  
+  <!-- Generate UDP Nodes -->
+  <node pkg="optitrack_ros_communication" type="generate_udp_nodes.py" name="$(anon generate_udp_nodes)" output="screen">
+    <param name="number_of_nodes" value="$(arg number_of_nodes)" />
+    <param name="base_id" value="$(arg base_id)" />
+    <param name="ip" value="$(arg udp_server_ip)" />
+    <param name="base_port" value="$(arg base_port)" />
+    <param name="namespace" value="$(arg namespace)" />
+  </node>
+</launch>

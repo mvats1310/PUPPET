@@ -1,0 +1,49 @@
+trial_dir,status,participant_id,condition,trial_id,training_group,task_success,technician_intervention,num_rows,duration_seconds,ee_missing_ratio,num_issues,num_review_reasons,issues,review_reasons
+data/P02_2D_T01,pass,P02,2D,T01,standard,True,False,12560,250.9890501499176,0.0015127388535031848,0,0,,
+data/P02_2D_T02,fail,P02,2D,T02,standard,True,True,5849,116.96216392517093,0.0,1,0,"Technician/researcher intervention occurred during execution trial T02 (2 intervention(s), severity=minor).",
+data/P02_2D_T03,pass,P02,2D,T03,standard,True,False,3700,73.96080708503723,0.0,0,0,,
+data/P02_REAL_T01,review,P02,REAL,T01,standard,True,False,8249,164.93909001350403,0.0,0,1,,Object tracking appears nearly flat across x/y/z.
+data/P02_REAL_T02,fail,P02,REAL,T02,standard,True,True,3900,77.97978138923645,0.0,1,2,"Technician/researcher intervention occurred during execution trial T02 (1 intervention(s), severity=minor).",Object tracking appears nearly flat across x/y/z. | Gripper state is nearly flat during a successful pick-place trial. Check whether gripper motion was captured correctly.
+data/P02_REAL_T03,review,P02,REAL,T03,standard,True,False,1385,27.656708478927612,0.0,0,3,,Object tracking appears nearly flat across x/y/z. | Gripper state is nearly flat during a successful pick-place trial. Check whether gripper motion was captured correctly. | quality_report object_path_length is near zero despite task_success=true.
+data/P02_VR_T01,pass,P02,VR,T01,standard,True,False,3450,68.96739506721497,0.0,0,0,,
+data/P02_VR_T02,pass,P02,VR,T02,standard,True,False,3278,65.53757905960083,0.0,0,0,,
+data/P02_VR_T03,pass,P02,VR,T03,standard,True,False,2171,43.39988446235654,0.0,0,0,,
+data/P03_2D_T01,review,P03,2D,T01,standard,True,True,8261,164.99677729606628,0.001452608643021426,0,3,,High missing ratio in object_x: 1.00 | High missing ratio in object_y: 1.00 | High missing ratio in object_z: 1.00
+data/P03_2D_T02,review,P03,2D,T02,standard,True,False,3999,79.93933272361761,0.0,0,3,,High missing ratio in object_x: 1.00 | High missing ratio in object_y: 1.00 | High missing ratio in object_z: 1.00
+data/P03_2D_T03,review,P03,2D,T03,standard,True,False,3600,71.95939111709595,0.0,0,4,,High missing ratio in object_x: 1.00 | High missing ratio in object_y: 1.00 | High missing ratio in object_z: 1.00 | Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P03_REAL_T01,review,P03,REAL,T01,standard,True,False,5001,99.98086953163148,0.0013997200559888023,0,3,,High missing ratio in object_x: 1.00 | High missing ratio in object_y: 1.00 | High missing ratio in object_z: 1.00
+data/P03_REAL_T02,review,P03,REAL,T02,standard,True,False,1800,35.960193157196045,0.0,0,3,,High missing ratio in object_x: 1.00 | High missing ratio in object_y: 1.00 | High missing ratio in object_z: 1.00
+data/P03_REAL_T03,review,P03,REAL,T03,standard,True,False,4300,85.95939588546759,0.0,0,3,,High missing ratio in object_x: 1.00 | High missing ratio in object_y: 1.00 | High missing ratio in object_z: 1.00
+data/P03_VR_T01,pass,P03,VR,T01,standard,True,False,4159,82.95568060874939,0.004327963452753066,0,0,,
+data/P03_VR_T02,pass,P03,VR,T02,standard,True,False,2900,57.95747089385986,0.0,0,0,,
+data/P03_VR_T03,pass,P03,VR,T03,standard,True,False,2350,46.95887875556946,0.0,0,0,,
+data/P04_2D_T01,pass,P04,2D,T01,standard,True,False,8615,171.99651861190796,0.002089378990133488,0,0,,
+data/P04_2D_T02,review,P04,2D,T02,standard,True,False,3850,76.98189091682431,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P04_2D_T03,review,P04,2D,T03,standard,True,False,2951,58.98227572441101,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P04_REAL_T01,pass,P04,REAL,T01,standard,True,False,6912,137.9804768562317,0.0023148148148148147,0,0,,
+data/P04_REAL_T02,review,P04,REAL,T02,standard,True,False,2500,49.959887981414795,0.0,0,1,,Gripper state is nearly flat during a successful pick-place trial. Check whether gripper motion was captured correctly.
+data/P04_REAL_T03,pass,P04,REAL,T03,standard,True,False,2150,42.994348287582426,0.0,0,0,,
+data/P04_VR_T01,review,P04,VR,T01,standard,True,True,7301,144.98899912834167,0.004656896315573209,0,1,,Object tracking appears nearly flat across x/y/z.
+data/P04_VR_T02,pass,P04,VR,T02,standard,True,False,4601,91.99779009819034,0.0,0,0,,
+data/P04_VR_T03,pass,P04,VR,T03,standard,True,False,5251,104.98073530197144,0.0,0,0,,
+data/P06_2D_T01,review,P06,2D,T01,standard,True,True,5864,116.98556017875671,0.0030695770804911324,0,2,,Object tracking appears nearly flat across x/y/z. | Gripper state is nearly flat during a successful pick-place trial. Check whether gripper motion was captured correctly.
+data/P06_2D_T02,review,P06,2D,T02,standard,True,False,1900,37.99716901779178,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P06_2D_T03,review,P06,2D,T03,standard,True,False,1850,36.96656608581546,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P06_REAL_T01,pass,P06,REAL,T01,standard,True,False,11961,238.99399352073672,0.0015048908954100827,0,0,,
+data/P06_REAL_T02,review,P06,REAL,T02,standard,True,False,2699,53.947078227996826,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P06_REAL_T03,review,P06,REAL,T03,standard,True,False,2201,43.981958866119385,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P06_VR_T01,pass,P06,VR,T01,standard,True,False,20565,410.9982922077179,0.0008266472161439338,0,0,,
+data/P06_VR_T02,review,P06,VR,T02,standard,True,False,3649,72.95580220222473,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P06_VR_T03,review,P06,VR,T03,standard,True,False,3249,64.94812297821045,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P07_VR_T01,pass,P07,VR,T01,standard,True,False,4499,89.96040296554565,0.0,0,0,,
+data/P07_VR_T02,pass,P07,VR,T02,standard,True,False,2650,52.96406602859494,0.0,0,0,,
+data/P07_VR_T03,pass,P07,VR,T03,standard,True,False,2500,49.976826906204224,0.0,0,0,,
+data/P08_2D_T01,pass,P08,2D,T01,standard,True,False,12134,241.99913144111636,0.0029668699522004283,0,0,,
+data/P08_2D_T02,pass,P08,2D,T02,standard,True,False,10509,208.98155689239502,0.0,0,0,,
+data/P08_2D_T03,pass,P08,2D,T03,standard,True,False,9200,183.9770085811615,0.0,0,0,,
+data/P08_REAL_T01,pass,P08,REAL,T01,standard,True,True,10615,211.98478937149048,0.0016015073009891664,0,0,,
+data/P08_REAL_T02,review,P08,REAL,T02,standard,True,False,2800,55.949440240859985,0.0,0,1,,Arm joint motion is very small despite task_success=true. Check whether the trial segment captured the actual task.
+data/P08_REAL_T03,pass,P08,REAL,T03,standard,True,False,2500,49.97867774963379,0.0,0,0,,
+data/P08_VR_T01,pass,P08,VR,T01,standard,True,False,7350,146.95329737663275,0.0,0,0,,
+data/P08_VR_T02,pass,P08,VR,T02,standard,True,False,3450,68.96849274635315,0.0,0,0,,
+data/P08_VR_T03,pass,P08,VR,T03,standard,True,False,3951,78.97894549369812,0.0,0,0,,

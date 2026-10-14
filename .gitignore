@@ -52,3 +52,35 @@ sysinfo.txt
 *.exr
 
 
+
+# Large aggregated research telemetry
+/results/summaries/all_telemetry_10hz.csv
+
+# ROS recordings and large experiment files
+*.bag
+*.bag.active
+*.db3
+
+# Generated ROS files
+**/build/
+**/devel/
+**/logs/
+**/__pycache__/
+*.pyc
+
+# Large aggregated telemetry
+/results/summaries/all_telemetry_10hz.csv
+
+# Large experimental recordings
+*.bag
+*.bag.active
+*.db3
+
+# Generated files
+**/build/
+**/devel/
+**/logs/
+**/__pycache__/
+
+# Large telemetry file
+/results/summaries/all_telemetry_10hz.csv

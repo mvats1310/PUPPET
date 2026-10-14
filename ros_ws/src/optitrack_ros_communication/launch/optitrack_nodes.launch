@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- OptiTrack Arguments -->
+  <arg name="serverIP" default="10.205.3.3"/>
+  <arg name="namespace" default="natnet_ros"/>
+  <arg name="clientIP" default="10.205.3.254"/>
+
+  <!-- NatNet Options -->
+  <arg name="log_internals" default="false"/>
+  <arg name="log_frames" default="false"/>
+  <arg name="log_latencies" default="false"/>
+
+  <arg name="serverType" default="unicast"/>
+
+  <arg name="pub_rigid_body" default="true"/> 
+  <arg name="pub_rigid_body_marker" default="false"/>  
+  <arg name="pub_individual_marker" default="false"/>
+  <arg name="pub_pointcloud" default="false"/>
+
+  <!-- UDP Arguments -->
+  <arg name="udp_client" default="true"/>
+  <arg name="udp_server_ip" default="10.205.3.4"/>
+  <arg name="number_of_nodes" default="10"/>
+  <arg name="base_id" default="0"/>
+  <arg name="base_port" default="9876"/>
+
+  <!-- Launch the OptiTrack NatNet Client -->
+  <group if="$(eval arg('namespace') == 'natnet_ros')">
+    <include file="$(find natnet_ros_cpp)/launch/natnet_ros.launch">
+      <arg name="log_internals" value="$(arg log_internals)"/>
+      <arg name="log_frames" value="$(arg log_frames)"/>
+      <arg name="log_latencies" value="$(arg log_latencies)"/>
+      <arg name="serverIP" value="$(arg serverIP)"/>
+      <arg name="clientIP" value="$(arg clientIP)"/>
+      <arg name="serverType" value="$(arg serverType)"/>
+      <arg name="pub_rigid_body" default="$(arg pub_rigid_body)"/>
+      <arg name="pub_rigid_body_marker" default="$(arg pub_rigid_body_marker)"/>  
+      <arg name="pub_individual_marker" default="$(arg pub_individual_marker)"/>
+      <arg name="pub_pointcloud" default="$(arg pub_pointcloud)"/>
+    </include>
+  </group>
+
+  <!-- Launch the OptiTrack VRPN Client -->
+  <group if="$(eval arg('namespace') == 'optitrack')">
+    <node pkg="vrpn_client_ros" type="vrpn_client_node" name="optitrack" output="screen">
+      <rosparam subst_value="true">
+        server: $(arg serverIP)
+        port: 3883
+        update_frequency: 120.0
+        frame_id: world
+        use_server_time: false
+        broadcast_tf: true
+        refresh_tracker_frequency: 1.0
+      </rosparam>
+    </node>
+  </group>
+
+  <!-- Generate UDP Nodes -->
+  <group if="$(eval arg('udp_client') == true)">
+    <node pkg="optitrack_ros_communication" type="generate_udp_nodes.py" name="$(anon generate_udp_nodes)" output="screen">
+      <param name="number_of_nodes" value="$(arg number_of_nodes)" />
+      <param name="base_id" value="$(arg base_id)" />
+      <param name="ip" value="$(arg udp_server_ip)" />
+      <param name="base_port" value="$(arg base_port)" />
+      <param name="namespace" value="$(arg namespace)" />
+    </node>
+  </group>
+</launch>
