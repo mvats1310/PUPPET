@@ -1,0 +1,37 @@
+# Unity generated files
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]serSettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.sln
+*.suo
+*.user
+
+# OS files
+# Compiled Unity builds
+*.apk
+*.aab
+*.x86_64
+*.so
+*_Data/
+*_BurstDebugInformation_DoNotShip/
+
+# Crash files
+mono_crash.mem.*
+*.blob
+
+# Other generated files
+UIElementsSchema/.DS_Store
+Thumbs.db
+

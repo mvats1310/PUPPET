@@ -1,0 +1,38 @@
+newmtl Union9Mtl
+Material Color
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.74902 0.74902 0.74902 
+
+d 1
+
+Ns 81
+
+map_Ka Union9Tex.png
+map_Kd Union9Tex.png
+map_d Union9Tex.png
+
+newmtl Union2Mtl
+Material Color
+Ka 1 1 1
+Kd 1 1 1
+Ks 0.74902 0.74902 0.74902 
+
+d 1
+
+Ns 81
+
+map_Ka Union2Tex.png
+map_Kd Union2Tex.png
+map_d Union2Tex.png
+
+newmtl Union1Mtl
+Material Color
+Ka 0.124741 0.113921 0.121986
+Kd 0.124741 0.113921 0.121986
+Ks 0.0934334 0.085329 0.0913697 
+
+d 1
+
+Ns 81
+
