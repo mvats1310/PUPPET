@@ -8,6 +8,8 @@
 
 Click a section below to jump directly to it. For a normal lab session, start with **[Section 5](#section-5)** and then follow the **[six-terminal checklist](#section-11)**. If you are installing PUPPET on a new machine, begin with **[Section 4](#section-4)**.
 
+> **One-command startup.** On `archimedes`, run `./puppet doctor` and then `./puppet up`. These start the same processes as the six-terminal checklist, in the same order, and ask the operator before every arm motion. `./puppet down` stops them. See [`docs/SETUP_IMPROVEMENTS.md`](docs/SETUP_IMPROVEMENTS.md). Settings are in `config/puppet.env`. The manual six-terminal procedure below still works as a fallback.
+
 
 1. [System overview](#section-1)
 2. [Hardware and software](#section-2)
@@ -92,8 +94,9 @@ PUPPET/
   ros_ws/src/keyboard_teleop/
   ros_ws/src/optitrack_ros_communication/
   ros_ws/src/natnet_ros_cpp/           # [VERIFY presence]
-  tracking/pose_to_odom.py             # [VERIFY committed]
-  tracking/puck_pose_to_odom.py        # [VERIFY committed]
+  ros_ws/src/puppet_bringup/           # tracking scripts (pose_to_odom.py, puck_pose_to_odom.py) + mocap.launch
+  puppet                               # one-command session runner (./puppet help)
+  config/puppet.env                    # IPs, hostnames, rigid-body topics used by ./puppet
   validation/
   results/summaries/
   dependencies/tiago_public_ws.rosinstall   # [VERIFY committed]
@@ -539,7 +542,7 @@ Before enabling robot motion, check that moving the tracked TIAGo and puck produ
 
 ## 11. Daily startup checklist — six terminals
 
-This is the **quick version of the complete startup procedure** in Sections 7–10. It documents the operator’s current workflow, including the PlayMotion behavior described above. Follow the lab’s physical robot safety procedure before any movement.
+`./puppet up` automates this checklist (see the note under Contents). This is the **quick version of the complete startup procedure** in Sections 7–10. It documents the operator’s current workflow, including the PlayMotion behavior described above. Follow the lab’s physical robot safety procedure before any movement.
 
 1. **Physical preflight:** E-stop available, TIAGo powered and approved for motion, space clear, Motive running on `gaia`, Quest charged.
 2. **Mini PC terminal A:** source ROS Noetic and `~/tiago_public_ws/devel/setup.bash`, set `ROS_MASTER_URI=http://10.205.3.26:11311` and `ROS_IP=10.205.3.122`, then launch `optitrack_nodes.launch` as shown in §8.3.
