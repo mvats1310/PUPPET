@@ -17,9 +17,12 @@ class PuckPoseToOdom:
     def __init__(self):
         rospy.init_node("puck_pose_to_odom")
 
-        # Replace this with the puck's exact OptiTrack topic.
-        self.input_topic = "/natnet_ros/umh_object_mahika/pose"
-        self.output_topic = "/puck_mocap"
+        # Set ~input_topic to the puck's exact OptiTrack topic
+        # (check `rostopic list | grep natnet_ros`).
+        self.input_topic = rospy.get_param(
+            "~input_topic", "/natnet_ros/umh_object_mahika/pose"
+        )
+        self.output_topic = rospy.get_param("~output_topic", "/puck_mocap")
 
         self.pose_sub = rospy.Subscriber(
             self.input_topic,
@@ -35,9 +38,9 @@ class PuckPoseToOdom:
         )
 
         # Puck position offset, if the marker is not centered.
-        self.offset_x = 0.0
-        self.offset_y = 0.0
-        self.offset_z = 0.0
+        self.offset_x = rospy.get_param("~offset_x", 0.0)
+        self.offset_y = rospy.get_param("~offset_y", 0.0)
+        self.offset_z = rospy.get_param("~offset_z", 0.0)
 
         # Rotation state.
         self.initialized = False

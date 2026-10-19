@@ -1,0 +1,319 @@
+#!/usr/bin/env bash
+# PUPPET one-command session runner (run on the archimedes mini PC).
+#
+#   ./puppet doctor       preflight checks only (network, SSH, ROS master, duplicate nodes)
+#   ./puppet up           start everything in a tmux session, in the lab's order
+#   ./puppet check        health check of a running session
+#   ./puppet attach       re-open the tmux session (detach again: Ctrl+B then D)
+#   ./puppet reset-arm    stop telepresence, move to START_MOTION again, restart telepresence
+#   ./puppet down         stop everything in reverse order
+#   ./puppet shell        a shell with the archimedes ROS environment loaded
+#
+# Options for up / reset-arm:
+#   --yes        do not ask before the arm moves (only once the operator has checked the area)
+#   --detach     do not attach to tmux at the end
+#
+# Every long-running process gets its own tmux window, so its log stays visible as in the
+# six-terminal procedure: mocap (terminals A+E+F), play_motion (C), telepresence (B).
+# Settings live in config/puppet.env (+ config/puppet.local.env for local overrides).
+# Ctrl+C is not an emergency stop. Keep the TIAGo E-stop within reach.
+
+set -euo pipefail
+
+PUPPET_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PUPPET_ROOT
+
+load_config() {
+  local cfg="${PUPPET_CONFIG:-$PUPPET_ROOT/config/puppet.env}"
+  set -a
+  # shellcheck source=config/puppet.env
+  source "$cfg"
+  if [[ -f "$PUPPET_ROOT/config/puppet.local.env" ]]; then source "$PUPPET_ROOT/config/puppet.local.env"; fi
+  set +a
+}
+
+# ---------------------------------------------------------------- output helpers
+if [[ -t 1 ]]; then B=$'\e[1m'; G=$'\e[32m'; Y=$'\e[33m'; R=$'\e[31m'; N=$'\e[0m'; else B='' G='' Y='' R='' N=''; fi
+step() { echo "${B}==> $*${N}"; }
+ok()   { echo "  ${G}ok${N}    $*"; }
+warn() { echo "  ${Y}warn${N}  $*"; }
+fail() { echo "  ${R}FAIL${N}  $*"; }
+die()  { echo "${R}error:${N} $*" >&2; exit 1; }
+
+confirm() {
+  [[ "${ASSUME_YES:-false}" == true ]] && return 0
+  local ans
+  read -r -p "${B}$* [y/N] ${N}" ans
+  [[ "$ans" == [yY]* ]]
+}
+
+# ---------------------------------------------------------------- environments
+ros_env() {
+  # ROS setup files are not nounset-safe.
+  set +u
+  # shellcheck disable=SC1090
+  source "$ROS_SETUP"
+  if [[ -f "$TIAGO_WS_SETUP" ]]; then source "$TIAGO_WS_SETUP"; fi
+  if [[ -n "${PUPPET_WS_SETUP:-}" && -f "$PUPPET_WS_SETUP" ]]; then source "$PUPPET_WS_SETUP"; fi
+  set -u
+  export ROS_MASTER_URI ROS_IP
+  unset ROS_HOSTNAME
+}
+
+# One shared SSH connection for every TIAGo command, so a password (if any) is asked once.
+SSH_OPTS=(-o "ControlMaster=auto" -o "ControlPath=$HOME/.ssh/puppet-%r@%h:%p" -o "ControlPersist=30m"
+          -o "ServerAliveInterval=5")
+
+tiago() {  # tiago [-t] "<command>": run a command on TIAGo inside its PAL environment
+  local tty=()
+  if [[ "${1:-}" == -t ]]; then tty=(-t); shift; fi
+  ssh "${SSH_OPTS[@]}" "${tty[@]}" "$TIAGO_SSH" "$TIAGO_SETUP && $1"
+}
+
+# ---------------------------------------------------------------- ROS queries
+master_up()  { timeout 5 rosnode list >/dev/null 2>&1; }
+node_up()    { timeout 5 rosnode list 2>/dev/null | grep -qx "$1"; }
+topic_up()   { timeout 5 rostopic list 2>/dev/null | grep -qx "$1"; }
+topic_live() { timeout "${2:-3}" rostopic echo -n 1 "$1" >/dev/null 2>&1; }
+port_open()  { timeout 2 bash -c "</dev/tcp/$1/$2" 2>/dev/null; }
+
+controller_state() {  # prints running / stopped / missing / unknown
+  timeout 5 python3 - "$1" 2>/dev/null <<'EOF' || echo unknown
+import sys, rospy
+from controller_manager_msgs.srv import ListControllers
+rospy.wait_for_service("/controller_manager/list_controllers", timeout=3)
+cs = rospy.ServiceProxy("/controller_manager/list_controllers", ListControllers)().controller
+print(next((c.state for c in cs if c.name == sys.argv[1]), "missing"))
+EOF
+}
+running() { [[ "$(controller_state "$1")" == running ]]; }
+
+wait_for() {  # wait_for <seconds> <description> <command...>
+  local secs=$1 what=$2 t=0; shift 2
+  until "$@"; do
+    if (( t >= secs )); then fail "$what (gave up after ${secs}s)"; return 1; fi
+    sleep 1; t=$((t + 1))
+  done
+  ok "$what"
+}
+
+# ---------------------------------------------------------------- tmux (own server, so settings stay local)
+tm() { tmux -L puppet "$@"; }
+have_session() { tm has-session -t "$SESSION" 2>/dev/null; }
+
+start_window() {  # start_window <name>: run "./puppet _proc <name>" in its own window
+  local name=$1
+  tm kill-window -t "$SESSION:$name" 2>/dev/null || true
+  tm new-window -d -t "$SESSION" -n "$name" "'$PUPPET_ROOT/puppet' _proc $name"
+}
+
+window_alive() { [[ "$(tm display-message -p -t "$SESSION:$1" '#{pane_dead}' 2>/dev/null)" == 0 ]]; }
+
+interrupt_window() {  # Ctrl+C a window and wait for its process to exit
+  local name=$1 secs=${2:-15} t=0
+  window_alive "$name" || return 0
+  tm send-keys -t "$SESSION:$name" C-c
+  while window_alive "$name"; do
+    if (( t >= secs )); then warn "$name still running after ${secs}s (./puppet attach)"; return 1; fi
+    sleep 1; t=$((t + 1))
+  done
+  ok "stopped $name"
+}
+
+# ---------------------------------------------------------------- processes (each runs inside a tmux window)
+proc() {
+  case "$1" in
+    mocap)
+      ros_env
+      # --wait: never start a local roscore; the master is TIAGo's.
+      exec roslaunch --wait puppet_bringup mocap.launch \
+        server_ip:="$MOTIVE_IP" client_ip:="$ROS_IP" udp_client:="$MOCAP_UDP_CLIENT" \
+        base_topic:="$BASE_TOPIC" puck_topic:="$PUCK_TOPIC" ;;
+    play_motion)
+      tiago -t "exec roslaunch tiago_bringup play_motion.launch $PLAY_MOTION_ARGS" ;;
+    telepresence)
+      tiago -t "exec roslaunch tiago_telepresence_controllers tiago_real.launch audio:=$TELEPRESENCE_AUDIO tcp_ip:=$TCP_IP tcp_port:=$TCP_PORT" ;;
+    *) die "unknown process $1" ;;
+  esac
+}
+
+# ---------------------------------------------------------------- commands
+doctor() {
+  local bad=0 n
+  step "Preflight"
+  if command -v tmux >/dev/null; then ok "tmux installed"; else fail "tmux missing: sudo apt install tmux"; bad=1; fi
+  if [[ -f "$ROS_SETUP" ]]; then ok "ROS: $ROS_SETUP"; else fail "missing $ROS_SETUP"; bad=1; fi
+  if [[ -f "$TIAGO_WS_SETUP" ]]; then ok "workspace: $TIAGO_WS_SETUP"; else fail "missing $TIAGO_WS_SETUP (scripts/setup_workspace.sh)"; bad=1; fi
+  ros_env
+  if rospack find puppet_bringup >/dev/null 2>&1; then ok "puppet_bringup found"
+  else fail "puppet_bringup not found: build PUPPET/ros_ws (scripts/setup_workspace.sh) or set PUPPET_WS_SETUP"; bad=1; fi
+
+  if hostname -I 2>/dev/null | tr ' ' '\n' | grep -qx "$ROS_IP"; then ok "ROS_IP $ROS_IP is this machine"
+  else fail "ROS_IP $ROS_IP is not in 'hostname -I' ($(hostname -I 2>/dev/null)); set it in config/puppet.local.env"; bad=1; fi
+
+  local master_host=${ROS_MASTER_URI#*://}; master_host=${master_host%%:*}
+  if ping -c 1 -W 2 "$master_host" >/dev/null 2>&1; then ok "TIAGo $master_host reachable"; else fail "cannot ping ROS master host $master_host"; bad=1; fi
+  if ping -c 1 -W 2 "$MOTIVE_IP" >/dev/null 2>&1; then ok "Motive $MOTIVE_IP reachable"; else fail "cannot ping Motive host $MOTIVE_IP"; bad=1; fi
+
+  if ssh "${SSH_OPTS[@]}" -o BatchMode=yes -o ConnectTimeout=5 "$TIAGO_SSH" true 2>/dev/null; then ok "SSH to $TIAGO_SSH"
+  else warn "SSH to $TIAGO_SSH asks for a password (ssh-copy-id $TIAGO_SSH avoids it); it will be asked once"; fi
+
+  if master_up; then
+    ok "ROS master $ROS_MASTER_URI answers"
+    if topic_live /joint_states 5; then ok "/joint_states publishing"; else warn "/joint_states not publishing"; fi
+    for n in /natnet_ros /optitrack_pose_to_odom /puck_pose_to_odom /tp_controller_switcher /tp_arm_motion; do
+      if node_up "$n"; then warn "$n already running (earlier session?): stop it before ./puppet up"; fi
+    done
+    if node_up /play_motion; then warn "/play_motion already running; it will be reused, not relaunched"; fi
+  else
+    fail "ROS master $ROS_MASTER_URI not reachable (TIAGo up? do NOT start a roscore here)"; bad=1
+  fi
+  return $bad
+}
+
+check() {
+  local bad=0 c s
+  ros_env
+  step "Session health"
+  if master_up; then ok "ROS master"; else fail "ROS master $ROS_MASTER_URI"; return 1; fi
+  if topic_live /joint_states; then ok "/joint_states"; else fail "/joint_states"; bad=1; fi
+  if topic_live "$BASE_TOPIC"; then ok "$BASE_TOPIC"; else fail "$BASE_TOPIC (rigid body streaming in Motive?)"; bad=1; fi
+  if topic_live "$PUCK_TOPIC"; then ok "$PUCK_TOPIC"
+  else
+    fail "$PUCK_TOPIC"; bad=1
+    echo "        rigid-body topics actually published (set PUCK_TOPIC in config/puppet.local.env):"
+    timeout 5 rostopic list 2>/dev/null | grep -E '^/natnet_ros/.*/pose$' | sed 's/^/          /' || true
+  fi
+  if topic_live /odom_mocap; then ok "/odom_mocap"; else fail "/odom_mocap"; bad=1; fi
+  if topic_live /puck_mocap; then ok "/puck_mocap"; else fail "/puck_mocap"; bad=1; fi
+  if port_open "$TCP_IP" "$TCP_PORT"; then ok "ROS-TCP endpoint $TCP_IP:$TCP_PORT (Unity)"; else fail "ROS-TCP endpoint $TCP_IP:$TCP_PORT"; bad=1; fi
+  for c in arm_tp_controller gripper_tp_controller torso_tp_controller head_tp_controller; do
+    s=$(controller_state "$c")
+    if [[ "$s" == running ]]; then ok "$c running"; else fail "$c: $s"; bad=1; fi
+  done
+  return $bad
+}
+
+prime_controllers() {
+  # The operator's workaround, automated: start telepresence, wait for its controllers,
+  # Ctrl+C it. On exit tp_controller_switcher starts the standard controllers again,
+  # which PlayMotion needs.
+  step "Standard arm/torso controllers not running: start telepresence once and stop it (operator workaround)"
+  start_window telepresence
+  wait_for 90 "arm_tp_controller running" running arm_tp_controller || die "telepresence did not start; ./puppet attach"
+  interrupt_window telepresence 20 || die "could not stop telepresence; ./puppet attach"
+  wait_for 20 "arm_controller running" running arm_controller || die "arm_controller still not running"
+}
+
+move_to_start_and_teleop() {
+  # START_MOTION is defined in tiago_telepresence_controllers/config/telepresence_motions.yaml,
+  # which only reaches the parameter server when telepresence is launched. Without it,
+  # run_motion has nothing to play. Loading it directly replaces "start telepresence, Ctrl+C".
+  step "Loading '$START_MOTION' definition on TIAGo"
+  tiago 'rosparam load $(rospack find tiago_telepresence_controllers)/config/telepresence_motions.yaml' \
+    || die "could not load telepresence_motions.yaml on TIAGo"
+  ok "telepresence_motions.yaml loaded"
+
+  if ! running arm_controller || ! running torso_controller; then prime_controllers; fi
+
+  local own_play_motion=false
+  if node_up /play_motion; then
+    ok "reusing running /play_motion"
+  else
+    step "Starting PlayMotion (window: play_motion)"
+    start_window play_motion
+    own_play_motion=true
+  fi
+  wait_for 60 "/play_motion action server" topic_up /play_motion/status || die "PlayMotion did not come up; ./puppet attach"
+
+  step "Moving to '$START_MOTION'"
+  confirm "TIAGo moves to '$START_MOTION' now. Operator beside the robot, area clear, E-stop in reach?" \
+    || die "aborted before any motion"
+  tiago -t "rosrun play_motion run_motion $START_MOTION"
+  confirm "Did the arm reach '$START_MOTION' cleanly, with no collision?" || die "stopped; telepresence not started"
+
+  step "Starting telepresence (window: telepresence)"
+  start_window telepresence
+  wait_for 90 "arm_tp_controller running" running arm_tp_controller || die "telepresence controllers not running; ./puppet attach"
+  wait_for 30 "ROS-TCP endpoint $TCP_IP:$TCP_PORT" port_open "$TCP_IP" "$TCP_PORT" || true
+
+  if [[ "$STOP_PLAY_MOTION_AFTER_TELEPRESENCE" == true && "$own_play_motion" == true ]]; then
+    step "Stopping PlayMotion (operator procedure)"
+    interrupt_window play_motion || true
+  fi
+}
+
+up() {
+  if have_session; then die "session '$SESSION' already exists: ./puppet attach, or ./puppet down first"; fi
+  doctor || die "preflight failed; fix the FAIL lines above"
+  echo
+  confirm "Physical preflight done (ReadMe Section 5): E-stop in reach, TIAGo approved for motion, Motive running on gaia?" \
+    || die "aborted"
+
+  tm new-session -d -s "$SESSION" -n control "'$PUPPET_ROOT/puppet' shell"
+  tm set-window-option -g remain-on-exit on >/dev/null
+
+  step "Starting OptiTrack bridge + pose-to-odom (window: mocap)"
+  start_window mocap
+  wait_for 30 "$BASE_TOPIC" topic_live "$BASE_TOPIC" || warn "base rigid body not streaming yet; check Motive on gaia"
+  wait_for 15 "/odom_mocap" topic_live /odom_mocap || true
+
+  move_to_start_and_teleop
+
+  echo
+  check || warn "some checks failed (above); fix them before teleoperating"
+  echo
+  echo "${B}Ready.${N} Quest: Unknown Sources -> pxspatial. Check heading and puck in Unity before moving the arm."
+  echo "Logs: ./puppet attach (windows: mocap, play_motion, telepresence).  Stop: ./puppet down"
+  if [[ "${DETACH:-false}" != true ]]; then tm attach -t "$SESSION"; fi
+}
+
+reset_arm() {
+  have_session || die "no session running (./puppet up)"
+  ros_env
+  step "Stopping telepresence (standard controllers come back)"
+  interrupt_window telepresence 20 || die "telepresence did not stop; ./puppet attach"
+  move_to_start_and_teleop
+  check || true
+}
+
+down() {
+  if ! have_session; then echo "no session '$SESSION' running"; return 0; fi
+  step "Stopping in reverse order"
+  interrupt_window telepresence 20 || true
+  interrupt_window play_motion || true
+  interrupt_window mocap || true
+  tm kill-session -t "$SESSION"
+  ok "session closed. Robot power-down: ReadMe Section 15."
+}
+
+usage() { awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; }
+
+# ---------------------------------------------------------------- main
+load_config
+cmd=${1:-help}
+shift || true
+for arg in "$@"; do
+  case "$arg" in
+    --yes) ASSUME_YES=true ;;
+    --detach) DETACH=true ;;
+  esac
+done
+
+case "$cmd" in
+  up)        up ;;
+  down)      down ;;
+  check)     check ;;
+  doctor)    doctor ;;
+  reset-arm) reset_arm ;;
+  attach)    tm attach -t "$SESSION" ;;
+  shell)
+    # ~/.bashrc first, then the PUPPET environment, so a ROS_MASTER_URI in .bashrc cannot win.
+    exec bash --rcfile <(printf '%s\n' '[ -f ~/.bashrc ] && source ~/.bashrc' \
+      "PUPPET_ROOT='$PUPPET_ROOT'" "source '$PUPPET_ROOT/puppet' _env" \
+      'echo "PUPPET env: ROS_MASTER_URI=$ROS_MASTER_URI ROS_IP=$ROS_IP"') -i ;;
+  _env)      ros_env; set +eu +o pipefail; return 0 2>/dev/null ;;
+  _proc)     proc "$1" ;;
+  help|-h|--help) usage ;;
+  *) die "unknown command '$cmd' (./puppet help)" ;;
+esac

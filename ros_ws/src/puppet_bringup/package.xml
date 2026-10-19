@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>puppet_bringup</name>
+  <version>0.1.0</version>
+  <description>PUPPET bringup: OptiTrack pose-to-odometry bridges and the mini-PC (archimedes) launch file.</description>
+  <maintainer email="todo@todo.todo">PUPPET team</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>tf</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>optitrack_ros_communication</exec_depend>
+  <exec_depend>natnet_ros_cpp</exec_depend>
+</package>

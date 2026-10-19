@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import rospy
 import math
 import numpy as np
@@ -12,15 +12,20 @@ class PoseToOdom:
     def __init__(self):
         rospy.init_node('optitrack_pose_to_odom')
 
-        # Topics
+        # Topics (overridable from the launch file, defaults unchanged)
+        self.input_topic = rospy.get_param(
+            "~input_topic", "/natnet_ros/umh_tiago_base/pose"
+        )
+        self.output_topic = rospy.get_param("~output_topic", "/odom_mocap")
+
         self.pose_sub = rospy.Subscriber(
-            "/natnet_ros/umh_tiago_base/pose",
+            self.input_topic,
             PoseStamped,
             self.pose_callback
         )
 
         self.odom_pub = rospy.Publisher(
-            "/odom_mocap",
+            self.output_topic,
             Odometry,
             queue_size=1
         )
@@ -35,10 +40,12 @@ class PoseToOdom:
 
         # Fixed world-space offset if needed
         # Keep these at 0 if the marker is centered on the base
-        self.offset_x = 0.0
-        self.offset_y = 0.0
+        self.offset_x = rospy.get_param("~offset_x", 0.0)
+        self.offset_y = rospy.get_param("~offset_y", 0.0)
 
         rospy.loginfo("optitrack_pose_to_odom node started")
+        rospy.loginfo("Subscribing to: %s", self.input_topic)
+        rospy.loginfo("Publishing to: %s", self.output_topic)
 
     def pose_callback(self, msg):
         # ---------------- POSITION ----------------

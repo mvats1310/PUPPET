@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!--
+  Mini-PC (archimedes) side of PUPPET, in one launch file.
+  Replaces terminals A, E and F of the six-terminal checklist:
+
+    A: roslaunch optitrack_ros_communication optitrack_nodes.launch serverIP:=... clientIP:=...
+    E: python3 ~/pose_to_odom.py
+    F: python3 ~/puck_pose_to_odom.py
+
+  The defaults are the lab values recorded in the ReadMe. The `puppet` script
+  overrides them from config/puppet.env.
+-->
+<launch>
+  <!-- NatNet connection (Motive on gaia -> archimedes) -->
+  <arg name="server_ip" default="10.205.3.3"/>
+  <arg name="client_ip" default="10.205.3.122"/>
+
+  <!-- optitrack_nodes.launch also starts UDP relays (umh_0..umh_9 -> udp_server_ip).
+       Kept on to match the operator's command; turn off once confirmed unused. -->
+  <arg name="udp_client" default="true"/>
+
+  <!-- Rigid-body topics published by natnet_ros_cpp (/natnet_ros/<Motive name>/pose) -->
+  <arg name="base_topic" default="/natnet_ros/umh_tiago_base/pose"/>
+  <arg name="puck_topic" default="/natnet_ros/umh_object_mahika/pose"/>
+
+  <include file="$(find optitrack_ros_communication)/launch/optitrack_nodes.launch">
+    <arg name="serverIP" value="$(arg server_ip)"/>
+    <arg name="clientIP" value="$(arg client_ip)"/>
+    <arg name="udp_client" value="$(arg udp_client)"/>
+  </include>
+
+  <!-- TIAGo base pose -> /odom_mocap -->
+  <node pkg="puppet_bringup" type="pose_to_odom.py" name="optitrack_pose_to_odom" output="screen">
+    <param name="input_topic" value="$(arg base_topic)"/>
+    <param name="output_topic" value="/odom_mocap"/>
+  </node>
+
+  <!-- Puck pose -> /puck_mocap -->
+  <node pkg="puppet_bringup" type="puck_pose_to_odom.py" name="puck_pose_to_odom" output="screen">
+    <param name="input_topic" value="$(arg puck_topic)"/>
+    <param name="output_topic" value="/puck_mocap"/>
+  </node>
+</launch>
