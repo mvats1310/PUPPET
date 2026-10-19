@@ -11,7 +11,7 @@ def do_switch_controllers(start_controllers, stop_controllers, strictness):
                                 strictness=strictness)
 
   if not response.ok:
-    rospy.logerror("Failed to switch controllers")
+    rospy.logerr("Failed to switch controllers")
   else:
     rospy.loginfo("...done.")
 

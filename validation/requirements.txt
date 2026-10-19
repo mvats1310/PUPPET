@@ -1,0 +1,8 @@
+# Python packages imported by validation/*.py (rosbag and tf come from ROS Noetic, not pip).
+# Unpinned: the versions used on archimedes were not recorded. Pin them with `pip freeze` there.
+numpy
+pandas
+matplotlib
+scipy
+scikit-learn
+PyYAML
