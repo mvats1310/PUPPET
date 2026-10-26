@@ -78,7 +78,15 @@ topic_up()   { timeout 5 rostopic list 2>/dev/null | grep -qx "$1"; }
 topic_live() { timeout "${2:-3}" rostopic echo -n 1 "$1" >/dev/null 2>&1; }
 port_open()  { timeout 2 bash -c "</dev/tcp/$1/$2" 2>/dev/null; }
 service_up() { timeout 5 rosservice list 2>/dev/null | grep -qx "$1"; }
-tiago_batch() { ssh "${SSH_OPTS[@]}" -o BatchMode=yes -o ConnectTimeout=5 "$TIAGO_SSH" "$TIAGO_SETUP && $1"; }
+# timeout: a shared connection whose robot was switched off hangs forever instead of failing.
+tiago_batch() { timeout 15 ssh "${SSH_OPTS[@]}" -o BatchMode=yes -o ConnectTimeout=5 "$TIAGO_SSH" "$TIAGO_SETUP && $1"; }
+
+drop_stale_ssh() {  # close a shared connection that no longer reaches TIAGo
+  if ssh "${SSH_OPTS[@]}" -O check "$TIAGO_SSH" 2>/dev/null && ! tiago_batch true 2>/dev/null; then
+    ssh "${SSH_OPTS[@]}" -O exit "$TIAGO_SSH" 2>/dev/null || true
+    warn "closed a stale SSH connection to $TIAGO_SSH (robot rebooted or switched off?)"
+  fi
+}
 
 endpoint_up() {
   # Probing the port by connecting makes the endpoint log "Connection from ... No more data"
@@ -173,10 +181,14 @@ doctor() {
   else fail "ROS_IP $ROS_IP is not in 'hostname -I' ($(hostname -I 2>/dev/null)); set it in config/puppet.local.env"; bad=1; fi
 
   local master_host=${ROS_MASTER_URI#*://}; master_host=${master_host%%:*}
-  if ping -c 1 -W 2 "$master_host" >/dev/null 2>&1; then ok "TIAGo $master_host reachable"; else fail "cannot ping ROS master host $master_host"; bad=1; fi
+  local tiago_up=false
+  if ping -c 1 -W 2 "$master_host" >/dev/null 2>&1; then ok "TIAGo $master_host reachable"; tiago_up=true
+  else fail "cannot ping ROS master host $master_host (TIAGo on?)"; bad=1; fi
   if ping -c 1 -W 2 "$MOTIVE_IP" >/dev/null 2>&1; then ok "Motive $MOTIVE_IP reachable"; else fail "cannot ping Motive host $MOTIVE_IP"; bad=1; fi
 
-  if ssh "${SSH_OPTS[@]}" -o BatchMode=yes -o ConnectTimeout=5 "$TIAGO_SSH" true 2>/dev/null; then ok "SSH to $TIAGO_SSH"
+  drop_stale_ssh
+  if [[ "$tiago_up" != true ]]; then :
+  elif tiago_batch true 2>/dev/null; then ok "SSH to $TIAGO_SSH"
   else warn "SSH to $TIAGO_SSH asks for a password (ssh-copy-id $TIAGO_SSH avoids it); it will be asked once"; fi
 
   if master_up; then
