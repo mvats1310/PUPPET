@@ -14,7 +14,8 @@
 #   --detach     do not attach to tmux at the end
 #
 # Every long-running process gets its own tmux window, so its log stays visible as in the
-# six-terminal procedure: mocap (terminals A+E+F), play_motion (C), telepresence (B).
+# six-terminal procedure: mocap (terminals A+E+F), play_motion (C), telepresence (B), plus
+# arm_motion (the Quest B-button node, see RESTART_ARM_MOTION).
 # Settings live in config/puppet.env (+ config/puppet.local.env for local overrides).
 # Ctrl+C is not an emergency stop. Keep the TIAGo E-stop within reach.
 
@@ -76,6 +77,24 @@ node_up()    { timeout 5 rosnode list 2>/dev/null | grep -qx "$1"; }
 topic_up()   { timeout 5 rostopic list 2>/dev/null | grep -qx "$1"; }
 topic_live() { timeout "${2:-3}" rostopic echo -n 1 "$1" >/dev/null 2>&1; }
 port_open()  { timeout 2 bash -c "</dev/tcp/$1/$2" 2>/dev/null; }
+service_up() { timeout 5 rosservice list 2>/dev/null | grep -qx "$1"; }
+tiago_batch() { ssh "${SSH_OPTS[@]}" -o BatchMode=yes -o ConnectTimeout=5 "$TIAGO_SSH" "$TIAGO_SETUP && $1"; }
+
+endpoint_up() {
+  # Probing the port by connecting makes the endpoint log "Connection from ... No more data"
+  # every time, so when it runs on TIAGo ask TIAGo whether something listens there instead.
+  local master_host=${ROS_MASTER_URI#*://}; master_host=${master_host%%:*}
+  if [[ "$TCP_IP" == "$master_host" ]] && tiago_batch true 2>/dev/null; then
+    tiago_batch "ss -Hltn 'sport = :$TCP_PORT' | grep -q ." 2>/dev/null
+  else
+    port_open "$TCP_IP" "$TCP_PORT"
+  fi
+}
+
+estop_state() {  # prints True / False / unknown (PAL message types only exist on TIAGo)
+  tiago_batch "timeout 4 rostopic echo -n 1 /power_status/is_emergency 2>/dev/null | head -1" 2>/dev/null \
+    | grep -xE 'True|False' || echo unknown
+}
 
 controller_state() {  # prints running / stopped / missing / unknown
   timeout 5 python3 - "$1" 2>/dev/null <<'EOF' || echo unknown
@@ -133,6 +152,8 @@ proc() {
       tiago -t "exec roslaunch tiago_bringup play_motion.launch $PLAY_MOTION_ARGS" ;;
     telepresence)
       tiago -t "exec roslaunch tiago_telepresence_controllers tiago_real.launch audio:=$TELEPRESENCE_AUDIO tcp_ip:=$TCP_IP tcp_port:=$TCP_PORT" ;;
+    arm_motion)
+      tiago -t "exec rosrun tiago_telepresence_controllers arm_motion.py __name:=tp_arm_motion" ;;
     *) die "unknown process $1" ;;
   esac
 }
@@ -160,7 +181,13 @@ doctor() {
 
   if master_up; then
     ok "ROS master $ROS_MASTER_URI answers"
-    if topic_live /joint_states 5; then ok "/joint_states publishing"; else warn "/joint_states not publishing"; fi
+    case "$(estop_state)" in
+      True)  fail "E-stop active: twist the red button up, then press the blinking green button to power the motors"; bad=1 ;;
+      False) ok "E-stop released" ;;
+      *)     warn "E-stop state unknown (needs passwordless SSH to TIAGo; check the robot)" ;;
+    esac
+    if topic_live /joint_states 5; then ok "/joint_states publishing"
+    else warn "/joint_states not publishing (motors off? if the green button blinks, press it)"; fi
     for n in /natnet_ros /optitrack_pose_to_odom /puck_pose_to_odom /tp_controller_switcher /tp_arm_motion; do
       if node_up "$n"; then warn "$n already running (earlier session?): stop it before ./puppet up"; fi
     done
@@ -186,11 +213,14 @@ check() {
   fi
   if topic_live /odom_mocap; then ok "/odom_mocap"; else fail "/odom_mocap"; bad=1; fi
   if topic_live /puck_mocap; then ok "/puck_mocap"; else fail "/puck_mocap"; bad=1; fi
-  if port_open "$TCP_IP" "$TCP_PORT"; then ok "ROS-TCP endpoint $TCP_IP:$TCP_PORT (Unity)"; else fail "ROS-TCP endpoint $TCP_IP:$TCP_PORT"; bad=1; fi
+  if endpoint_up; then ok "ROS-TCP endpoint $TCP_IP:$TCP_PORT (Unity)"; else fail "ROS-TCP endpoint $TCP_IP:$TCP_PORT"; bad=1; fi
   for c in arm_tp_controller gripper_tp_controller torso_tp_controller head_tp_controller; do
     s=$(controller_state "$c")
     if [[ "$s" == running ]]; then ok "$c running"; else fail "$c: $s"; bad=1; fi
   done
+  if service_up /tp_arm_motion/command; then ok "/tp_arm_motion/command (Quest B button)"
+  else fail "/tp_arm_motion/command (Quest B button)"; bad=1; fi
+  if [[ "$(estop_state)" == True ]]; then fail "E-stop active"; bad=1; fi
   return $bad
 }
 
@@ -203,6 +233,16 @@ prime_controllers() {
   wait_for 90 "arm_tp_controller running" running arm_tp_controller || die "telepresence did not start; ./puppet attach"
   interrupt_window telepresence 20 || die "could not stop telepresence; ./puppet attach"
   wait_for 20 "arm_controller running" running arm_controller || die "arm_controller still not running"
+}
+
+restart_arm_motion() {
+  # See RESTART_ARM_MOTION in config/puppet.env. Wait for the launch file's copy first, so it
+  # cannot appear after the kill.
+  step "Restarting tp_arm_motion now that the tp controllers are loaded (window: arm_motion)"
+  wait_for 30 "/tp_arm_motion from tiago_real.launch" node_up /tp_arm_motion || return 0
+  tiago "rosnode kill /tp_arm_motion" >/dev/null || warn "could not stop the launch file's tp_arm_motion"
+  start_window arm_motion
+  wait_for 30 "/tp_arm_motion/command" service_up /tp_arm_motion/command || warn "Quest B button will not work; ./puppet attach"
 }
 
 move_to_start_and_teleop() {
@@ -235,7 +275,8 @@ move_to_start_and_teleop() {
   step "Starting telepresence (window: telepresence)"
   start_window telepresence
   wait_for 90 "arm_tp_controller running" running arm_tp_controller || die "telepresence controllers not running; ./puppet attach"
-  wait_for 30 "ROS-TCP endpoint $TCP_IP:$TCP_PORT" port_open "$TCP_IP" "$TCP_PORT" || true
+  wait_for 30 "ROS-TCP endpoint $TCP_IP:$TCP_PORT" endpoint_up || true
+  if [[ "$RESTART_ARM_MOTION" == true ]]; then restart_arm_motion; fi
 
   if [[ "$STOP_PLAY_MOTION_AFTER_TELEPRESENCE" == true && "$own_play_motion" == true ]]; then
     step "Stopping PlayMotion (operator procedure)"
@@ -264,7 +305,7 @@ up() {
   check || warn "some checks failed (above); fix them before teleoperating"
   echo
   echo "${B}Ready.${N} Quest: Unknown Sources -> pxspatial. Check heading and puck in Unity before moving the arm."
-  echo "Logs: ./puppet attach (windows: mocap, play_motion, telepresence).  Stop: ./puppet down"
+  echo "Logs: ./puppet attach (windows: mocap, play_motion, telepresence, arm_motion).  Stop: ./puppet down"
   if [[ "${DETACH:-false}" != true ]]; then tm attach -t "$SESSION"; fi
 }
 
@@ -272,6 +313,7 @@ reset_arm() {
   have_session || die "no session running (./puppet up)"
   ros_env
   step "Stopping telepresence (standard controllers come back)"
+  interrupt_window arm_motion || true
   interrupt_window telepresence 20 || die "telepresence did not stop; ./puppet attach"
   move_to_start_and_teleop
   check || true
@@ -280,6 +322,7 @@ reset_arm() {
 down() {
   if ! have_session; then echo "no session '$SESSION' running"; return 0; fi
   step "Stopping in reverse order"
+  interrupt_window arm_motion || true
   interrupt_window telepresence 20 || true
   interrupt_window play_motion || true
   interrupt_window mocap || true

@@ -12,8 +12,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--arm", type=str, default=None)
 parser.add_argument("--motion", type=str, default=None)
 
+def tp_controller_names(cs):
+  # Looked up on every switch, not once at startup: tp_arm_motion starts in the same launch
+  # file as the spawner, so at startup the *_tp_controller list is often still empty, and
+  # every switch then did nothing (PlayMotion failed with "No controller was found for joint").
+  return [c.name for c in cs if c.name.endswith("_tp_controller")]
+
 def pre_switch_controllers():
   cs = list_controllers().controller
+  tp_controllers = tp_controller_names(cs)
   start_controllers = [c.name for c in cs if c.name.replace("_controller", "_tp_controller") in tp_controllers and c.state == "stopped"]
   stop_controllers = [c.name for c in cs if c.name in tp_controllers and c.state == "running"]
 
@@ -30,6 +37,7 @@ def pre_switch_controllers():
 
 def post_switch_controllers():
   cs = list_controllers().controller
+  tp_controllers = tp_controller_names(cs)
   start_controllers = [c.name for c in cs if c.name in tp_controllers and c.state == "stopped"]
   stop_controllers = [c.name for c in cs if c.name.replace("_controller", "_tp_controller") in tp_controllers and c.state == "running"]
 
@@ -110,8 +118,6 @@ if __name__ == "__main__":
 
   list_controllers = rospy.ServiceProxy("/controller_manager/list_controllers", ListControllers)
   switch_controller = rospy.ServiceProxy("/controller_manager/switch_controller", SwitchController)
-
-  tp_controllers = [c.name for c in list_controllers().controller if c.name.endswith("_tp_controller")]
 
   if args.motion:
     execute_arm_motion(args.motion)

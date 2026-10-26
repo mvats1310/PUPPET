@@ -1,6 +1,6 @@
-# PUPPET setup improvements (branch `setup-improvements`)
+# PUPPET setup improvements (branch `lab-demo`)
 
-This branch replaces the six-terminal startup with a single command on the `archimedes` mini PC. It also fixes several problems that stop a fresh machine from reproducing the setup. Nothing here has been run on the physical TIAGo yet; see [What was tested](#what-was-tested) before the first session.
+This branch replaces the six-terminal startup with a single command on the `archimedes` mini PC. It also fixes several problems that stop a fresh machine from reproducing the setup. It was first run on the physical TIAGo on 2026-10-26; see [First hardware session](#first-hardware-session-2026-10-26).
 
 ## 1. The one-command session
 
@@ -110,10 +110,35 @@ In a `ros:noetic-ros-base` Docker container (arm64):
 
 **Not tested:** anything that touches TIAGo (SSH, PlayMotion, telepresence, controller switching, `extend`), real NatNet/Motive, the full `setup_workspace.sh` build, or Unity.
 
-## First session on hardware
+## First hardware session (2026-10-26)
 
-1. `./puppet doctor` on archimedes, then fix any FAIL lines in `config/puppet.local.env`.
-2. `./puppet up` **with the operator next to the robot**. Each motion step waits for a yes.
-3. Watch step 4 of the sequence. If the start/stop workaround never triggers and `extend` still works, the parameter explanation in §2 was the cause.
-4. If PlayMotion turns out not to need stopping, set `STOP_PLAY_MOTION_AFTER_TELEPRESENCE=false`. That keeps Unity's `/tp_arm_motion/command` service usable.
-5. If anything differs from the ReadMe procedure, the six-terminal steps still work unchanged. The only difference is that the tracking scripts now run as `rosrun puppet_bringup pose_to_odom.py` and `rosrun puppet_bringup puck_pose_to_odom.py`.
+`./puppet up` ran end to end: OptiTrack bridge, `extend`, telepresence, Quest 2 connected, `./puppet check` all green, `./puppet down` back to standard controllers.
+
+**Confirmed**
+- §2 was right: loading `telepresence_motions.yaml` was enough. `extend` succeeded on the first try, and the start/stop workaround (step 4) never triggered.
+- PAL starts `/play_motion` at boot, so the script reuses it and does not stop it. Unity's B button keeps working.
+
+**Found and fixed in this branch**
+1. **The Quest B button did nothing.** `arm_motion.py` read the list of `*_tp_controller`s once at startup. It starts in the same launch file as the spawner, so the list was empty. Every switch was then a no-op, and PlayMotion failed with `No controller was found for joint 'torso_lift_joint'`. It now reads the list on every switch.
+   - Until that file is redeployed on TIAGo, `./puppet up` restarts the node after telepresence is up (`RESTART_ARM_MOTION=true`, window `arm_motion`).
+2. **E-stop.** TIAGo had booted with the e-stop pressed: `/joint_states` was silent and several startup jobs had timed out. `doctor` now reads `/power_status/is_emergency` on TIAGo and gives the exact recovery steps. After releasing the e-stop, the **blinking green button** must be pressed to power the motors again.
+3. **Accounts without sudo or a home directory.** archimedes LDAP users (e.g. `rsagastegui`) get no `/home` (autofs) and no sudo, and cannot read `/home/mahika`. `scripts/setup_workspace.sh --mocap-only` needs none of that.
+   - It builds only the three packages archimedes runs, from this repo, in a few seconds, and gets tmux from micromamba.
+   - Without a home, use `export HOME=/var/tmp/$USER` first, since `/var/tmp` survives reboots.
+4. **Noisy endpoint log.** `check` used to connect to port 10000, and every probe logged `Connection from … / No more data` in the telepresence window. It now asks TIAGo whether the port is listening (`ss`).
+
+**Open: arm mapping depends on the start pose.** `arm_tp_controller` applies the Quest command in the gripper frame, frozen when the controller starts (`H_0_N = H_0_N_initial * H_N`). `ArmCommander.cs` sends hand deltas in a base-like frame:
+- position as `(z, -x, y)`;
+- orientation as `(z, x, y, w)`, which does not match the position's handedness.
+
+So the mapping changes with the pose the arm is in when B finishes:
+- after `extend`, up↔down and left↔right are swapped;
+- after `offer`, up/down comes out sideways.
+
+Redefining `offer` as a base-aligned pose was tried and made the motion worse, so it was reverted. Fix this in simulation (Gazebo TIAGo with the telepresence controllers) before the next hardware attempt: express the command in `start_link` in the controller, and fix the quaternion conversion in Unity.
+
+**Controls (from the scene wiring):**
+- Right A turns head and arm following on and off together. The background goes black while it is on.
+- Right B toggles `offer` ↔ `home`, and works only while following is on.
+- Triggers and grips drive the gripper.
+- Left X and Y control speaker and microphone.
